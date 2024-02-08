@@ -62,8 +62,8 @@ import streamlit as st
 def display_and_update_weights(user_id):
     st.write(f"Profile: {user_id}")
     exercises = get_current_weights(user_id)
-    # A dictionary to track the selection state of each exercise
-    selection_state = {exercise_name: False for exercise_name in exercises}
+    # This will hold the selection state of each exercise.
+    selected_exercises = {}
 
     if exercises:
         for exercise_name, details in exercises.items():
@@ -74,15 +74,24 @@ def display_and_update_weights(user_id):
                     unit = "min" if "Cardio" in exercise_name else "kg"
                     st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
-                    # Toggle button for selection
-                    if selection_state[exercise_name]:
-                        button_label = f"✅ {exercise_name}"
-                    else:
-                        button_label = f"⬜ {exercise_name}"
-                    # When button is pressed, toggle the state
-                    if st.button(button_label, key=f"{user_id}_{exercise_name}"):
-                        selection_state[exercise_name] = not selection_state[exercise_name]
-                        # Optionally, you could call a function to immediately save this state
+                    # Use a checkbox, not a button, to select the exercise
+                    selected = st.checkbox("", key=f"{user_id}_{exercise_name}")
+                    selected_exercises[exercise_name] = selected
+
+        # 'Success' and 'Failure' buttons for the selected exercises
+        if st.button("Success for Selected"):
+            for exercise_name, selected in selected_exercises.items():
+                if selected:
+                    update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
+            st.experimental_rerun()
+
+        if st.button("Failure for Selected"):
+            for exercise_name, selected in selected_exercises.items():
+                if selected:
+                    update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
+            st.experimental_rerun()
+    else:
+        st.error("No exercises found for this user.")
 
         # Bottom buttons apply to all selected workouts
         if st.button("Success for Selected"):
