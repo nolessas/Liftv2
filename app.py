@@ -58,32 +58,50 @@ def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, 
     user_ref.update({detail_name: new_weight})
 
 def display_and_update_weights(user_id):
+    # Custom CSS to make the columns fit-content
+    st.markdown("""
+                <style>
+                    div[data-testid="column"] {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 0.75rem;
+                    }
+                    div[data-testid="column"] > div {
+                        flex: 1;
+                    }
+                    .stButton > button {
+                        width: 100%;
+                        padding: 0.25rem 0.75rem;
+                    }
+                </style>
+                """, unsafe_allow_html=True)
+    
     st.write(f"Profile: {user_id}")
     exercises = get_current_weights(user_id)
 
     if exercises:
         for exercise_name, details in exercises.items():
             if isinstance(details, dict):
-                # Extract detail name and weight
                 detail_name, weight = next(iter(details.items()))
                 unit = "min" if "Cardio" in exercise_name else "kg"
 
-                # Display the exercise detail and buttons on the same line
+                # Use custom column widths
                 col1, col2, col3 = st.columns([3, 1, 1])
                 with col1:
                     st.text(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
                     if st.button("✅", key=f"success_{exercise_name}"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
+                        update_exercise_weight(user_id, exercise_name, detail_name, weight, success=True)
                         st.experimental_rerun()
                 with col3:
                     if st.button("❌", key=f"fail_{exercise_name}"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
+                        update_exercise_weight(user_id, exercise_name, detail_name, weight, success=False)
                         st.experimental_rerun()
             else:
                 st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
     else:
         st.error("No exercises found for this user.")
+
 
 
 
