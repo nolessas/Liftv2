@@ -76,7 +76,7 @@ def display_and_update_weights(user_id):
                 </style>
                 """, unsafe_allow_html=True)
     
-    st.write(f"Profile: {user_id}")
+
     exercises = get_current_weights(user_id)
 
     if exercises:
