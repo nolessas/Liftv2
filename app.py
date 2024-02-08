@@ -57,13 +57,11 @@ def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, 
     # Update the nested field within the document
     user_ref.update({detail_name: new_weight})
 
-import streamlit as st
+
 
 def display_and_update_weights(user_id):
     st.write(f"Profile: {user_id}")
     exercises = get_current_weights(user_id)
-    # This will hold the selection state of each exercise.
-    selected_exercises = {}
 
     if exercises:
         for exercise_name, details in exercises.items():
@@ -74,37 +72,41 @@ def display_and_update_weights(user_id):
                     unit = "min" if "Cardio" in exercise_name else "kg"
                     st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
-                    # Use a checkbox, not a button, to select the exercise
-                    selected = st.checkbox("", key=f"{user_id}_{exercise_name}")
-                    selected_exercises[exercise_name] = selected
+                    # Custom checkmark to select the exercise
+                    exercise_key = f"{user_id}_{exercise_name}"
+                    if exercise_key not in st.session_state.selected_exercises:
+                        st.session_state.selected_exercises[exercise_key] = False  # Not selected by default
+                        
+                    # The checkmark icon changes depending on whether the exercise is selected
+                    checkmark = "☑️" if st.session_state.selected_exercises[exercise_key] else "⬜️"
+                    if st.button(checkmark, key=exercise_key):
+                        # Toggle the selection state
+                        st.session_state.selected_exercises[exercise_key] = not st.session_state.selected_exercises[exercise_key]
 
         # 'Success' and 'Failure' buttons for the selected exercises
         if st.button("Success for Selected"):
-            for exercise_name, selected in selected_exercises.items():
+            for exercise_key, selected in st.session_state.selected_exercises.items():
                 if selected:
+                    # Here you would update the exercise weight as success
+                    # extract the exercise name from the key
+                    exercise_name = exercise_key.split('_', 1)[1]
                     update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
+                    # Reset the selection
+                    st.session_state.selected_exercises[exercise_key] = False
             st.experimental_rerun()
 
         if st.button("Failure for Selected"):
-            for exercise_name, selected in selected_exercises.items():
+            for exercise_key, selected in st.session_state.selected_exercises.items():
                 if selected:
+                    # Here you would update the exercise weight as failure
+                    # extract the exercise name from the key
+                    exercise_name = exercise_key.split('_', 1)[1]
                     update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
+                    # Reset the selection
+                    st.session_state.selected_exercises[exercise_key] = False
             st.experimental_rerun()
     else:
         st.error("No exercises found for this user.")
-
-        # Bottom buttons apply to all selected workouts
-        if st.button("Success for Selected"):
-            for exercise_name, selected in selection_state.items():
-                if selected:
-                    update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
-            st.experimental_rerun()
-
-        if st.button("Failure for Selected"):
-            for exercise_name, selected in selection_state.items():
-                if selected:
-                    update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
-            st.experimental_rerun()
 
 
 
