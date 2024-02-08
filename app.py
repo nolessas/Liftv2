@@ -106,10 +106,10 @@ def display_and_update_weights(user_id):
 
 
 def main():
-    st.image("dale4.png", use_column_width=True)
+    st.image("dale2.png", use_column_width=True)
     st.title('')
     init_firebase()  # Initialize Firebase Admin SDK
-    selected_user = st.radio("Select user:", ["Egis", "Karolis", "Kipras"], horizontal=True)
+    selected_user = st.radio("", ["Egis", "Karolis", "Kipras"], horizontal=True)
     display_and_update_weights(selected_user)
 
 
