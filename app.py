@@ -71,11 +71,11 @@ def display_and_update_weights(user_id):
                     unit = "min" if "Cardio" in exercise_name else "kg"
                     st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
-                    st.write("✅ ❌")  # Display "v" and "x" buttons
+                    st.write("✅ ")  # Display "v" and "x" buttons
                     if st.button("✅", key=f"{user_id}_{exercise_name}_success"):
                         update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
                         st.experimental_rerun()
-                    st.write("")  # Add spacing
+                    st.write("❌")  # Add spacing
                     if st.button("❌", key=f"{user_id}_{exercise_name}_fail"):
                         update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
                         st.experimental_rerun()
