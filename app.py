@@ -7,8 +7,9 @@ import json
 def init_firebase():
     if not firebase_admin._apps:
         firebase_secret_dict = st.secrets["Fire_base"]
-        # Create a new dictionary with the modified private key
+        # Create a copy of the secret dictionary
         modified_secret_dict = firebase_secret_dict.copy()
+        # Replace escape characters in the private key
         modified_secret_dict['private_key'] = modified_secret_dict['private_key'].replace('\\n', '\n')
         cred = credentials.Certificate(modified_secret_dict)
         firebase_admin.initialize_app(cred)
