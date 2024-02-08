@@ -5,9 +5,12 @@ from firebase_admin import credentials, firestore
 
 
 # Initialize Firebase Admin using Streamlit secrets
+# Initialize Firebase Admin using Streamlit cloud secrets
 def init_firebase():
     if not firebase_admin._apps:
         firebase_secret_dict = st.secrets["Fire_base"]
+        # Remove escape characters from the private key
+        firebase_secret_dict['private_key'] = firebase_secret_dict['private_key'].replace('\\n', '\n')
         cred = credentials.Certificate(firebase_secret_dict)
         firebase_admin.initialize_app(cred)
 
