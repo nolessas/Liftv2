@@ -3,14 +3,11 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 
-import json
 
 # Initialize Firebase Admin using Streamlit secrets
 def init_firebase():
     if not firebase_admin._apps:
-        firebase_secret_json = st.secrets["Fire_base"]
-        print(type(firebase_secret_json))  # Check the type
-        firebase_secret_dict = json.loads(firebase_secret_json)
+        firebase_secret_dict = st.secrets["Fire_base"]
         cred = credentials.Certificate(firebase_secret_dict)
         firebase_admin.initialize_app(cred)
 
