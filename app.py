@@ -2,11 +2,19 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+
+# Initialize Firebase Admin using Streamlit secrets
+import json
+
+# Initialize Firebase Admin using Streamlit secrets
 def init_firebase():
     if not firebase_admin._apps:
-        firebase_secret_path = st.secrets["Fire_base"]
-        cred = credentials.Certificate(firebase_secret_path)
+        firebase_secret_json = st.secrets["Fire_base"]
+        firebase_secret_dict = json.loads(firebase_secret_json)
+        cred = credentials.Certificate(firebase_secret_dict)
         firebase_admin.initialize_app(cred)
+
+
 
 
 
