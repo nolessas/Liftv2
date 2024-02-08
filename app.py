@@ -66,16 +66,15 @@ def display_and_update_weights(user_id):
             if isinstance(details, dict):
                 # We expect only one key-value pair in 'details', so we extract them.
                 detail_name, weight = next(iter(details.items()))
-                col1, col2 = st.columns([5, 1])
+                col1, col2, col3 = st.columns([5, 1, 1])
                 with col1:
                     unit = "min" if "Cardio" in exercise_name else "kg"
                     st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
-                    st.write("")  # Display "v" and "x" buttons
                     if st.button("✅", key=f"{user_id}_{exercise_name}_success"):
                         update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
                         st.experimental_rerun()
-                    st.write("")  # Add spacing
+                with col3:
                     if st.button("❌", key=f"{user_id}_{exercise_name}_fail"):
                         update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
                         st.experimental_rerun()
@@ -83,7 +82,6 @@ def display_and_update_weights(user_id):
                 st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
     else:
         st.error("No exercises found for this user.")
-
 
 def main():
     st.title('Workout Progress Tracker')
