@@ -57,31 +57,40 @@ def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, 
     # Update the nested field within the document
     user_ref.update({detail_name: new_weight})
 
+import streamlit as st
+
 def display_and_update_weights(user_id):
     st.write(f"Profile: {user_id}")
     exercises = get_current_weights(user_id)
+    selected_exercises = []  # Keep track of selected exercises
 
     if exercises:
         for exercise_name, details in exercises.items():
             if isinstance(details, dict):
-                # We expect only one key-value pair in 'details', so we extract them.
                 detail_name, weight = next(iter(details.items()))
-                col1, col2, col3 = st.columns([5, 1, 1])
-                with col1:
-                    unit = "min" if "Cardio" in exercise_name else "kg"
-                    st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
-                with col2:
-                    if st.button("✅", key=f"{user_id}_{exercise_name}_success"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
-                        st.experimental_rerun()
-                with col3:
-                    if st.button("❌", key=f"{user_id}_{exercise_name}_fail"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
-                        st.experimental_rerun()
+                unit = "min" if "Cardio" in exercise_name else "kg"
+                # Check if the exercise is selected
+                if st.button(f"{exercise_name} {detail_name}: {weight}{unit} ✅", key=f"select_{user_id}_{exercise_name}"):
+                    selected_exercises.append(exercise_name)
+                    # Here you would save/update the selected state in your database or variable
+                # Display selected exercises with a checkmark
+                if exercise_name in selected_exercises:
+                    st.write(f"Selected: {exercise_name}")
             else:
                 st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
+                
+        # Step 2: Add Success and Failure buttons
+        if st.button("Success", key=f"{user_id}_success"):
+            # Here you would save the success state for the selected workouts
+            st.success("Workouts marked as successful!")
+            # Perform necessary actions like updating the database
+        if st.button("Failure", key=f"{user_id}_failure"):
+            # Here you would save the failure state for the selected workouts
+            st.error("Workouts marked as failed!")
+            # Perform necessary actions like updating the database
     else:
         st.error("No exercises found for this user.")
+
 
 def main():
     st.title('Workout Progress Tracker')
