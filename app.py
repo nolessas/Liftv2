@@ -42,8 +42,6 @@ def get_current_weights(user_id):
         print(f"No workouts found for user_id: {user_id}")  # Debug print
         return None
 
-
-
 def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, success):
     db = firestore.client()
     user_ref = db.collection(user_id).document(exercise_name)
@@ -63,49 +61,27 @@ def display_and_update_weights(user_id):
     st.write(f"Profile: {user_id}")
     exercises = get_current_weights(user_id)
 
-    if 'selected_exercises' not in st.session_state:
-        st.session_state.selected_exercises = {}
-
     if exercises:
         for exercise_name, details in exercises.items():
             if isinstance(details, dict):
+                # We expect only one key-value pair in 'details', so we extract them.
                 detail_name, weight = next(iter(details.items()))
-                col1, col2 = st.columns([5, 1])
+                col1, col2, col3 = st.columns([5, 1, 1])
                 with col1:
                     unit = "min" if "Cardio" in exercise_name else "kg"
                     st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
-                    # The checkmark icon changes depending on whether the exercise is selected
-                    exercise_key = f"{user_id}_{exercise_name}"
-                    if exercise_key not in st.session_state.selected_exercises:
-                        st.session_state.selected_exercises[exercise_key] = False  # Not selected by default
-
-                    checkmark_icon = "☑️" if st.session_state.selected_exercises[exercise_key] else "⬜️"
-                    if st.button(checkmark_icon, key=exercise_key):
-                        # Toggle the selection state
-                        st.session_state.selected_exercises[exercise_key] = not st.session_state.selected_exercises[exercise_key]
-
-        # 'Success' and 'Failure' buttons for the selected exercises
-        if st.button("Success for Selected"):
-            for exercise_key, selected in st.session_state.selected_exercises.items():
-                if selected:
-                    exercise_name = exercise_key.split('_')[1]
-                    detail_name, weight = next(iter(exercises[exercise_name].items()))
-                    update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
-                    st.session_state.selected_exercises[exercise_key] = False  # Reset selection state
-            st.experimental_rerun()
-
-        if st.button("Failure for Selected"):
-            for exercise_key, selected in st.session_state.selected_exercises.items():
-                if selected:
-                    exercise_name = exercise_key.split('_')[1]
-                    detail_name, weight = next(iter(exercises[exercise_name].items()))
-                    update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
-                    st.session_state.selected_exercises[exercise_key] = False  # Reset selection state
-            st.experimental_rerun()
+                    if st.button("✅", key=f"{user_id}_{exercise_name}_success"):
+                        update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
+                        st.experimental_rerun()
+                with col3:
+                    if st.button("❌", key=f"{user_id}_{exercise_name}_fail"):
+                        update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
+                        st.experimental_rerun()
+            else:
+                st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
     else:
         st.error("No exercises found for this user.")
-
 
 def main():
     st.title('Workout Progress Tracker')
