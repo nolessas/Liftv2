@@ -62,44 +62,38 @@ import streamlit as st
 def display_and_update_weights(user_id):
     st.write(f"Profile: {user_id}")
     exercises = get_current_weights(user_id)
-    selected_exercises = {}  # Keep track of selected exercises
+    # A dictionary to track the selection state of each exercise
+    selection_state = {exercise_name: False for exercise_name in exercises}
 
     if exercises:
         for exercise_name, details in exercises.items():
             if isinstance(details, dict):
                 detail_name, weight = next(iter(details.items()))
-                col1, col2, col3, col4 = st.columns([5, 1, 1, 1])  # Add an extra column for selection
+                col1, col2 = st.columns([5, 1])
                 with col1:
                     unit = "min" if "Cardio" in exercise_name else "kg"
                     st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
-                with col4:  # Use the extra column for checkboxes
-                    # Let users select exercises
-                    selected = st.checkbox("", key=f"select_{user_id}_{exercise_name}")
-                    selected_exercises[exercise_name] = selected
-
                 with col2:
-                    if st.button("✅", key=f"{user_id}_{exercise_name}_success"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
-                        st.experimental_rerun()
-                with col3:
-                    if st.button("❌", key=f"{user_id}_{exercise_name}_fail"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
-                        st.experimental_rerun()
-            else:
-                st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
+                    # Toggle button for selection
+                    if selection_state[exercise_name]:
+                        button_label = f"✅ {exercise_name}"
+                    else:
+                        button_label = f"⬜ {exercise_name}"
+                    # When button is pressed, toggle the state
+                    if st.button(button_label, key=f"{user_id}_{exercise_name}"):
+                        selection_state[exercise_name] = not selection_state[exercise_name]
+                        # Optionally, you could call a function to immediately save this state
 
-        # At the bottom, add Success and Failure buttons for selected exercises
+        # Bottom buttons apply to all selected workouts
         if st.button("Success for Selected"):
-            for exercise_name, selected in selected_exercises.items():
+            for exercise_name, selected in selection_state.items():
                 if selected:
-                    # Update each selected exercise as success
                     update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
             st.experimental_rerun()
 
         if st.button("Failure for Selected"):
-            for exercise_name, selected in selected_exercises.items():
+            for exercise_name, selected in selection_state.items():
                 if selected:
-                    # Update each selected exercise as failure
                     update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
             st.experimental_rerun()
     else:
