@@ -2,13 +2,12 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# Initialize Firebase Admin using Streamlit secrets
 def init_firebase():
     if not firebase_admin._apps:
-        firebase_secret = st.secrets["Fire_base"]
-        print(firebase_secret)  # This is for debugging; remove it in production!
-        cred = credentials.Certificate(firebase_secret)
+        firebase_secret_path = st.secrets["Fire_base"]
+        cred = credentials.Certificate(firebase_secret_path)
         firebase_admin.initialize_app(cred)
+
 
 
 # Function to get the current weights for a user
