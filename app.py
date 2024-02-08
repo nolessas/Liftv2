@@ -64,25 +64,27 @@ def display_and_update_weights(user_id):
     if exercises:
         for exercise_name, details in exercises.items():
             if isinstance(details, dict):
+                # Extract detail name and weight
                 detail_name, weight = next(iter(details.items()))
-                col1, col2, col3, col4 = st.columns([5, 2, 1, 1])  # Adjust the proportion of the columns as needed
+                unit = "min" if "Cardio" in exercise_name else "kg"
+
+                # Display the exercise detail and buttons on the same line
+                col1, col2, col3 = st.columns([3, 1, 1])
                 with col1:
-                    unit = "min" if "Cardio" in exercise_name else "kg"
-                    st.write(f"{exercise_name} {detail_name}: {weight}{unit}")
+                    st.text(f"{exercise_name} {detail_name}: {weight}{unit}")
                 with col2:
-                    st.write("")  # This creates an empty space for alignment purposes
-                with col3:
-                    if st.button("✅", key=f"{user_id}_{exercise_name}_success"):
+                    if st.button("✅", key=f"success_{exercise_name}"):
                         update_exercise_weight(user_id, exercise_name, detail_name, weight, True)
                         st.experimental_rerun()
-                with col4:
-                    if st.button("❌", key=f"{user_id}_{exercise_name}_fail"):
+                with col3:
+                    if st.button("❌", key=f"fail_{exercise_name}"):
                         update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
                         st.experimental_rerun()
             else:
                 st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
     else:
         st.error("No exercises found for this user.")
+
 
 
 def main():
