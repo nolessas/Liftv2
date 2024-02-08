@@ -105,8 +105,7 @@ def display_and_update_weights(user_id):
                 if selected:
                     update_exercise_weight(user_id, exercise_name, detail_name, weight, False)
             st.experimental_rerun()
-    else:
-        st.error("No exercises found for this user.")
+
 
 
 def main():
