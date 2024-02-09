@@ -29,17 +29,14 @@ def get_current_weights(user_id):
         for doc in docs:
             doc_id = doc.id
             doc_data = doc.to_dict()
-            # Assume that each document now contains a 'day' field with the value "Day1" or "Day2"
-            day = doc_data.get('day')
-            if day in workouts_by_day:
-                workouts_by_day[day][doc_id] = doc_data
-            else:
-                st.warning(f"Exercise {doc_id} does not have a valid 'day' field. Skipping.")
+            if doc_id in ["1.Squat", "2.Benchpress", "3.Deadlift"]:
+                workouts_by_day["Day1"][doc_id] = doc_data
+            elif doc_id in ["4.Cardio", "5.OHP", "6.Chinups"]:
+                workouts_by_day["Day2"][doc_id] = doc_data
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
     return workouts_by_day
-
 
 def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, success):
     db = firestore.client()
