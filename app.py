@@ -47,12 +47,21 @@ def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, 
     user_ref = db.collection(user_id).document(exercise_name)
     
     weight_increment = 2.5 if success else -2.5
+    new_weight = current_weight + weight_increment  # Default increment behavior
+
     if 'Chinups' in exercise_name:
-        new_weight = max(0, current_weight + weight_increment)
+        # For Chinups, do not enforce a minimum weight of 0 to allow negative weights
+        pass
     elif 'Cardio' in exercise_name:
+        # For Cardio, increment or decrement by 1
         new_weight = current_weight + (1 if success else -1)
     else:
-        new_weight = current_weight + weight_increment
+        # For other exercises, ensure the weight does not go below zero
+        new_weight = max(0, new_weight)
+    
+    # Update the nested field within the document
+    user_ref.update({detail_name: new_weight})
+
     
     # Update the nested field within the document
     user_ref.update({detail_name: new_weight})
