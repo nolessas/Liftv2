@@ -22,25 +22,21 @@ def init_firebase():
 def get_current_weights(user_id):
     db = firestore.client()
     user_ref = db.collection(user_id)  # Access the collection corresponding to the user
-    workouts = {}
-    
-    # Attempt to fetch all documents within the user's collection
+    workouts_by_day = {"Day1": {}, "Day2": {}}
+
     try:
         docs = user_ref.stream()
         for doc in docs:
             doc_id = doc.id
             doc_data = doc.to_dict()
-            workouts[doc_id] = doc_data
-            print(f"Found workout {doc_id} for user {user_id}: {doc_data}")  # Debug print
+            if doc_id in ["1.Squat", "2.Benchpress", "3.Deadlift"]:
+                workouts_by_day["Day1"][doc_id] = doc_data
+            elif doc_id in ["4.Cardio", "5.OHP", "6.Chinups"]:
+                workouts_by_day["Day2"][doc_id] = doc_data
     except Exception as e:
-        print(f"An error occurred: {e}")
+        st.error(f"An error occurred: {e}")
 
-    if workouts:
-        print(f"Collected workout data for user {user_id}: {workouts}")  # Debug print
-        return workouts
-    else:
-        print(f"No workouts found for user_id: {user_id}")  # Debug print
-        return None
+    return workouts_by_day
 
 def update_exercise_weight(user_id, exercise_name, detail_name, current_weight, success):
     db = firestore.client()
@@ -84,30 +80,34 @@ def display_and_update_weights(user_id):
                     }
                 </style>
                 """, unsafe_allow_html=True)
-    
 
-    exercises = get_current_weights(user_id)
+    # Fetch the categorized workouts
+    workouts_by_day = get_current_weights(user_id)
 
-    if exercises:
-        for exercise_name, details in exercises.items():
-            if isinstance(details, dict):
-                detail_name, weight = next(iter(details.items()))
-                unit = "min" if "Cardio" in exercise_name else "kg"
+    # Check if workouts exist
+    if workouts_by_day:
+        # Loop through each day and its exercises
+        for day, exercises in workouts_by_day.items():
+            st.header(day)  # Display the day as a header
+            for exercise_name, details in exercises.items():
+                if isinstance(details, dict):
+                    detail_name, weight = next(iter(details.items()))
+                    unit = "min" if "Cardio" in exercise_name else "kg"
 
-                # Use custom column widths
-                col1, col2, col3 = st.columns([3, 1, 1])
-                with col1:
-                    st.text(f"{exercise_name} {detail_name}: {weight}{unit}")
-                with col2:
-                    if st.button("✅", key=f"success_{exercise_name}"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, success=True)
-                        st.experimental_rerun()
-                with col3:
-                    if st.button("❌", key=f"fail_{exercise_name}"):
-                        update_exercise_weight(user_id, exercise_name, detail_name, weight, success=False)
-                        st.experimental_rerun()
-            else:
-                st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
+                    # Use custom column widths for display and buttons
+                    col1, col2, col3 = st.columns([3, 1, 1])
+                    with col1:
+                        st.text(f"{exercise_name} {detail_name}: {weight}{unit}")
+                    with col2:
+                        if st.button("✅", key=f"success_{exercise_name}"):
+                            update_exercise_weight(user_id, exercise_name, detail_name, weight, success=True)
+                            st.experimental_rerun()
+                    with col3:
+                        if st.button("❌", key=f"fail_{exercise_name}"):
+                            update_exercise_weight(user_id, exercise_name, detail_name, weight, success=False)
+                            st.experimental_rerun()
+                else:
+                    st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
     else:
         st.error("No exercises found for this user.")
 
