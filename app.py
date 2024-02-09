@@ -103,8 +103,12 @@ def display_and_update_weights(user_id):
 
 # Helper function to display exercises for a given day
 def display_exercises(exercises, day_exercises, user_id):
+    print(f"Displaying exercises for {day_exercises}")  # Debug print
     for exercise_name, details in exercises.items():
+        print(f"Checking exercise: {exercise_name}")  # Debug print
         if exercise_name in day_exercises:
+            # Your existing code for displaying exercises
+
             if isinstance(details, dict):
                 detail_name, weight = next(iter(details.items()))
                 unit = "min" if "Cardio" in exercise_name else "kg"
