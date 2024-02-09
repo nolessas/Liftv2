@@ -84,31 +84,12 @@ def display_and_update_weights(user_id):
                     }
                 </style>
                 """, unsafe_allow_html=True)
-
-    day_1_exercises = {'Squat', 'Benchpress', 'Deadlift'}
-    day_2_exercises = {'Cardio', 'OHP', 'Chinups'}
+    
 
     exercises = get_current_weights(user_id)
 
     if exercises:
-        # Display Day 1 exercises
-        st.header('Day 1 Exercises')
-        display_exercises(exercises, day_1_exercises, user_id)
-        
-        # Display Day 2 exercises
-        st.header('Day 2 Exercises')
-        display_exercises(exercises, day_2_exercises, user_id)
-    else:
-        st.error("No exercises found for this user.")
-
-# Helper function to display exercises for a given day
-def display_exercises(exercises, day_exercises, user_id):
-    print(f"Displaying exercises for {day_exercises}")  # Debug print
-    for exercise_name, details in exercises.items():
-        print(f"Checking exercise: {exercise_name}")  # Debug print
-        if exercise_name in day_exercises:
-            # Your existing code for displaying exercises
-
+        for exercise_name, details in exercises.items():
             if isinstance(details, dict):
                 detail_name, weight = next(iter(details.items()))
                 unit = "min" if "Cardio" in exercise_name else "kg"
@@ -127,7 +108,8 @@ def display_exercises(exercises, day_exercises, user_id):
                         st.experimental_rerun()
             else:
                 st.error(f"Unexpected data format for {exercise_name} in user {user_id}'s document.")
-
+    else:
+        st.error("No exercises found for this user.")
 
 
 
